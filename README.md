@@ -141,7 +141,7 @@ Trong ví dụ trên, chỉ số 1 được sử dụng để thiết lập giá
 Lời khuyên chung là luôn kiểm tra và đảm bảo rằng các chỉ số được sử dụng trong phương thức trên đối tượng PreparedStatement và ResultSet là hợp lệ để tránh lỗi và kết quả không chính xác.
 
 -----------------------
-Cảnh báo "switch statements should not contain non-case labels" là một cảnh báo được sinh ra bởi các công cụ phân tích mã nguồn như SonarQube để cảnh báo việc sử dụng nhãn (label) không phải là case trong câu lệnh switch trong Java.
+**Cảnh báo "switch statements should not contain non-case labels"** là một cảnh báo được sinh ra bởi các công cụ phân tích mã nguồn như SonarQube để cảnh báo việc sử dụng nhãn (label) không phải là case trong câu lệnh switch trong Java.
 
 Trong Java, câu lệnh switch được sử dụng để kiểm tra một biểu thức và thực hiện các hành động khác nhau dựa trên giá trị của biểu thức đó. Trong câu lệnh switch, các case được sử dụng để xác định các giá trị có thể của biểu thức và hành động tương ứng với mỗi giá trị.
 
@@ -172,7 +172,7 @@ Trong ví dụ trên, câu lệnh switch được sử dụng để kiểm tra g
 Lời khuyên chung là luôn sử dụng các nhãn case hợp lệ trong câu lệnh switch và tránh sử dụng nhãn không phải là case để đảm bảo mã nguồn rõ ràng và dễ hiểu.
 
 -------------------
-ảnh báo "ThreadGroup should not be used" là một cảnh báo được sinh ra bởi các công cụ phân tích mã nguồn như SonarQube để cảnh báo việc sử dụng lớp ThreadGroup trong Java.
+**Cảnh báo "ThreadGroup should not be used"** là một cảnh báo được sinh ra bởi các công cụ phân tích mã nguồn như SonarQube để cảnh báo việc sử dụng lớp ThreadGroup trong Java.
 
 Trong Java, lớp ThreadGroup được sử dụng để nhóm các luồng (threads) lại thành các nhóm để quản lý chúng. Tuy nhiên, từ JDK 5 (Java Development Kit 5) trở đi, lớp ThreadGroup không được khuyến nghị sử dụng và đã được gánh chịu nhiều hạn chế và vấn đề về bảo mật.
 
@@ -193,4 +193,123 @@ executor.shutdown();
 Trong ví dụ trên, ExecutorService được sử dụng để quản lý một nhóm luồng cố định với kích thước là 10. Luồng được thực thi thông qua việc gửi Runnable tới ExecutorService. Sau khi hoàn thành, ExecutorService được tắt (shutdown).
 
 Lời khuyên chung là tránh sử dụng lớp ThreadGroup và thay thế bằng các cơ chế quản lý luồng hiện đại trong Java để quản lý luồng một cách an toàn và hiệu quả.
+
+-------------
+**Cảnh báo "wait should not be called when multiple locks are held"** là một cảnh báo được sinh ra bởi các công cụ phân tích mã nguồn như SonarQube để cảnh báo việc sử dụng phương thức wait() trong Java khi đang giữ nhiều khóa (locks) cùng một lúc.
+
+Trong Java, phương thức wait() được sử dụng để đặt một luồng (thread) vào trạng thái chờ (waiting) cho đến khi một luồng khác gọi phương thức notify() hoặc notifyAll() trên cùng đối tượng. Phương thức wait() phải được gọi trong một khối synchronized và giữ khóa của đối tượng đó.
+
+Lỗi này xảy ra khi chúng ta gọi phương thức wait() trong một khối synchronized khi đang giữ nhiều khóa cùng một lúc. Khi gọi wait() trong tình huống này, luồng sẽ giữ các khóa mà nó đã có, nhưng vẫn trong trạng thái chờ. Điều này có thể dẫn đến tình huống xảy ra deadlock hoặc khó khăn trong việc đồng bộ và quản lý khóa.
+
+Để khắc phục lỗi này, bạn cần đảm bảo rằng phương thức wait() chỉ được gọi khi đang giữ một khóa duy nhất. Nếu cần chờ khi đang giữ nhiều khóa, bạn có thể xem xét việc tạo ra một khóa mới hoặc sử dụng các cơ chế đồng bộ khác như Lock trong gói java.util.concurrent.
+
+Ví dụ:
+```
+Object lock1 = new Object();
+Object lock2 = new Object();
+
+synchronized (lock1) {
+    synchronized (lock2) {
+        // ...
+        try {
+            lock1.wait(); // Không nên gọi wait() ở đây khi đang giữ lock2
+        } catch (InterruptedException e) {
+            // Xử lý ngoại lệ
+        }
+    }
+}
+```
+Trong ví dụ trên, chúng ta giữ cả lock1 và lock2, nhưng gọi wait() khi đang giữ lock2. Điều này có thể gây ra vấn đề trong việc đồng bộ và gây ra lỗi.
+
+Lời khuyên chung là chỉ gọi phương thức wait() trong một khối synchronized khi đảm bảo chỉ đang giữ một khóa duy nhất. Nếu cần chờ khi đang giữ nhiều khóa, xem xét sử dụng các cơ chế đồng bộ khác như Lock để tránh vấn đề đồng bộ không mong muốn và deadlock.
+
+-------------------
+**Cảnh báo "wait should not be called when multiple locks are held"** là một cảnh báo được sinh ra bởi các công cụ phân tích mã nguồn như SonarQube để cảnh báo việc sử dụng phương thức wait() trong Java khi đang giữ nhiều khóa (locks) cùng một lúc.
+
+Trong Java, phương thức wait() được sử dụng để đặt một luồng (thread) vào trạng thái chờ (waiting) cho đến khi một luồng khác gọi phương thức notify() hoặc notifyAll() trên cùng đối tượng. Phương thức wait() phải được gọi trong một khối synchronized và giữ khóa của đối tượng đó.
+
+Lỗi này xảy ra khi chúng ta gọi phương thức wait() trong một khối synchronized khi đang giữ nhiều khóa cùng một lúc. Khi gọi wait() trong tình huống này, luồng sẽ giữ các khóa mà nó đã có, nhưng vẫn trong trạng thái chờ. Điều này có thể dẫn đến tình huống xảy ra deadlock hoặc khó khăn trong việc đồng bộ và quản lý khóa.
+
+Để khắc phục lỗi này, bạn cần đảm bảo rằng phương thức wait() chỉ được gọi khi đang giữ một khóa duy nhất. Nếu cần chờ khi đang giữ nhiều khóa, bạn có thể xem xét việc tạo ra một khóa mới hoặc sử dụng các cơ chế đồng bộ khác như Lock trong gói java.util.concurrent.
+
+Ví dụ:
+```
+Object lock1 = new Object();
+Object lock2 = new Object();
+
+synchronized (lock1) {
+    synchronized (lock2) {
+        // ...
+        try {
+            lock1.wait(); // Không nên gọi wait() ở đây khi đang giữ lock2
+        } catch (InterruptedException e) {
+            // Xử lý ngoại lệ
+        }
+    }
+}
+```
+Trong ví dụ trên, chúng ta giữ cả lock1 và lock2, nhưng gọi wait() khi đang giữ lock2. Điều này có thể gây ra vấn đề trong việc đồng bộ và gây ra lỗi.
+
+Lời khuyên chung là chỉ gọi phương thức wait() trong một khối synchronized khi đảm bảo chỉ đang giữ một khóa duy nhất. Nếu cần chờ khi đang giữ nhiều khóa, xem xét sử dụng các cơ chế đồng bộ khác như Lock để tránh vấn đề đồng bộ không mong muốn và deadlock.
+
+----------------
+Cảnh báo "wait() should be used instead of Thread.sleep() when a lock is held" là một cảnh báo được sinh ra bởi các công cụ phân tích mã nguồn như SonarQube để cảnh báo việc sử dụng phương thức Thread.sleep() trong Java khi đang giữ một khóa (lock).
+
+Trong Java, phương thức Thread.sleep() được sử dụng để tạm dừng thực thi của một luồng (thread) trong một khoảng thời gian nhất định. Phương thức này không giải phóng khóa của bất kỳ đối tượng nào và chỉ dừng luồng hiện tại trong thời gian chờ.
+
+Lỗi này xảy ra khi chúng ta sử dụng phương thức Thread.sleep() để tạm dừng một luồng trong khi vẫn đang giữ một khóa. Điều này có thể gây ra trục trặc trong việc đồng bộ và quản lý khóa, đồng thời tạo ra khả năng xảy ra deadlock (tình huống mà các luồng không thể tiếp tục thực thi vì đợi nhau giải phóng khóa).
+
+Thay vào đó, khuyến nghị sử dụng phương thức wait() để tạm dừng luồng trong khi đang giữ khóa. Phương thức wait() được gọi trên đối tượng khóa và tạm dừng luồng, giải phóng khóa và cho phép các luồng khác tiếp tục thực thi. Khi có sự thông báo (notify hoặc notifyAll) từ một luồng khác, luồng sẽ được đánh thức và tiếp tục thực thi sau khi lấy lại khóa.
+
+Ví dụ:
+```
+Object lock = new Object();
+
+synchronized (lock) {
+    try {
+        lock.wait(1000); // Sử dụng wait() thay vì Thread.sleep() khi đang giữ khóa
+    } catch (InterruptedException e) {
+        // Xử lý ngoại lệ
+    }
+}
+```
+Trong ví dụ trên, chúng ta sử dụng phương thức wait() trên đối tượng khóa để tạm dừng luồng trong khi đang giữ khóa. Luồng sẽ tạm dừng, giải phóng khóa và chờ đợi tối đa 1000 miligiây. Sau đó, luồng sẽ tiếp tục thực thi sau khi lấy lại khóa.
+
+Lời khuyên chung là sử dụng phương thức wait() thay vì Thread.sleep() khi đang giữ một khóa để đảm bảo quá trình đồng bộ và quản lý khóa được thực hiện chính xác và tránh các vấn đề như deadlock
+
+-----------------
+Lỗi "A secure password should be used when connecting to a database" là một cảnh báo được sinh ra bởi SonarQube hoặc các công cụ tương tự để cảnh báo về việc sử dụng mật khẩu an toàn khi thiết lập kết nối đến cơ sở dữ liệu.
+
+Khi ứng dụng cần kết nối đến cơ sở dữ liệu, người phát triển cần cung cấp thông tin xác thực như tên người dùng và mật khẩu. Mật khẩu được sử dụng để đảm bảo chỉ những người dùng hợp lệ mới có thể truy cập và thao tác trên cơ sở dữ liệu.
+
+Lỗi này xuất hiện khi mật khẩu sử dụng để kết nối đến cơ sở dữ liệu không đáp ứng các tiêu chuẩn bảo mật đủ mạnh. Điều này có thể tạo ra một lỗ hổng bảo mật, khiến cho dữ liệu trong cơ sở dữ liệu dễ bị tấn công hoặc truy cập trái phép.
+
+Một mật khẩu an toàn khi kết nối đến cơ sở dữ liệu thường có các đặc điểm sau:
+
+Độ dài: Mật khẩu nên đủ dài để khó bị đoán định. Thông thường, mật khẩu nên có ít nhất 8 ký tự hoặc hơn.
+
+Độ phức tạp: Mật khẩu nên kết hợp các loại ký tự như chữ hoa, chữ thường, số và ký tự đặc biệt. Điều này làm cho mật khẩu khó bị đoán định hoặc tấn công bằng các phương pháp tấn công từ điển hoặc brute force.
+
+Không sử dụng thông tin cá nhân: Mật khẩu không nên dựa trên thông tin cá nhân như tên người dùng, ngày sinh, hoặc các thông tin dễ đoán khác.
+
+Thay đổi định kỳ: Mật khẩu nên được thay đổi định kỳ để đảm bảo tính bảo mật. Việc thay đổi mật khẩu định kỳ giúp ngăn chặn việc tấn công bằng cách sử dụng mật khẩu cũ.
+
+Sử dụng công cụ quản lý mật khẩu: Sử dụng một công cụ quản lý mật khẩu an toàn để lưu trữ và quản lý mật khẩu kết nối cơ sở dữ liệu.
+
+Lỗi này nhắc nhở người phát triển ứng dụng để đảm bảo rằng mật khẩu sử dụng khi kết nối đến cơ sở dữ liệu là an toàn và tuân thủ các nguyên tắc bảo mật cơ bản.
+
+--------------------------
+**Cảnh báo "Allowing deserialization of LDAP objects is security-sensitive"** là một cảnh báo bảo mật được áp dụng khi cho phép giải nén (deserialization) các đối tượng LDAP (Lightweight Directory Access Protocol).
+
+LDAP là một giao thức được sử dụng để truy cập và quản lý thông tin trong một hệ thống thư mục. Khi một ứng dụng nhận được một đối tượng LDAP từ một nguồn bên ngoài, nó thường phải thực hiện quá trình giải nén (deserialization) để chuyển đổi đối tượng từ dạng dữ liệu nhị phân sang dạng đối tượng trong ngôn ngữ lập trình.
+
+Tuy nhiên, việc cho phép giải nén các đối tượng LDAP là một vấn đề nhạy cảm về bảo mật. Nếu không được xử lý một cách cẩn thận, việc giải nén các đối tượng LDAP có thể dẫn đến các lỗ hổng bảo mật như:
+
+Rủi ro mã độc: Nếu đối tượng LDAP bị tấn công và chứa mã độc, việc giải nén nó có thể làm cho mã độc được thực thi trong ứng dụng, gây nguy hiểm cho hệ thống.
+
+Tấn công từ chối dịch vụ (DoS): Một đối tượng LDAP có thể được thiết kế để khiến quá trình giải nén tốn nhiều tài nguyên, dẫn đến quá tải hệ thống và gây ra tấn công từ chối dịch vụ.
+
+Lợi dụng các lỗ hổng: Việc giải nén đối tượng LDAP có thể làm tiếp cận đến các lỗ hổng trong quá trình giải nén, gây ra khả năng tấn công hoặc khai thác các lỗ hổng bảo mật khác trong hệ thống.
+
+Do đó, để đảm bảo an toàn bảo mật, các ứng dụng không nên cho phép giải nén các đối tượng LDAP một cách mặc định. Thay vào đó, cần xem xét cẩn thận về tính cần thiết và rủi ro của việc giải nén đối tượng LDAP và áp dụng các biện pháp bảo mật phù hợp như kiểm tra và xác thực dữ liệu, sử dụng cơ chế phân quyền, và hạn chế quyền truy cập đối với các tài nguyên liên quan đến LDAP.
 
